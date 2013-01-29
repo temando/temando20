@@ -1,0 +1,31 @@
+<?php if($this->getConfigData('pickup/status')): ?>
+    <div id="pickup" name="pickup" class="pickup" style="display:none">
+	<div class="title">
+	    <?php echo $this->__($this->getConfigData('pickup/title')) ?>
+	</div>
+	<div class="content-wrapper">
+	    <select name="pickup-location" id="pickup-location" style="width: 535px" onchange="pickup.selectChange()"></select>
+	    <img id="loading" name="loading" src="<?php echo $this->getSkinUrl("css/temando/images/ajax-s-load.gif", array("secure"=>true)) ?>" style="display:none" />
+	    <!--<div class="pickup-map" id="pickup-map" style="height: 250px;width:535px"></div>-->
+	    <div class="pickup-map" id="pickup-map" style="<?php echo $this->getMapStyle()?>"></div>
+	    <input type="hidden" name="current_location" id="current_location" value="" />
+	</div>
+
+
+
+    </div>
+	<?php if($this->getConfigData('pickup/show_map')): ?>
+	<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $this->getConfigData('pickup/api_key') ?>&sensor=false" type="text/javascript"></script>
+	<?php endif; ?>
+    <script type="text/javascript">
+    //<![CDATA[
+	var pickup = new Pickup({
+	    getLocations: '<?php echo $this->getUrl('etemando/pickup/getLocations') ?>',
+	    setLocations: '<?php echo $this->getUrl('etemando/pickup/setLocations') ?>'},
+	    'pickup-location',
+	    <?php echo $this->getConfigData('pickup/show_map')?>,
+	    'pickup-map'
+	);
+    //]]>
+    </script>
+<?php endif; ?>

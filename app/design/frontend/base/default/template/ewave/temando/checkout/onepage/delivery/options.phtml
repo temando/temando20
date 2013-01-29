@@ -1,0 +1,50 @@
+<?php 
+/* @var $this Ewave_Temando_Block_Onepage_Shipping_Delivery_Options */ 
+$options = $this->getEnabledOptions();
+$selected_options = $this->getSelectedOptions();
+?>
+<?php if($this->showOptions() && !empty($options)): ?> 
+<div id="delivery-options">
+    <table class="delivery-options-table" id="delivery-options-table">
+	<thead>
+	    <tr><th colspan="2">Extra Delivery Options</th></tr>
+	</thead>
+	<tbody>
+	    <?php foreach($options as $key => $description): ?>
+	    <tr>
+		<td><input type="checkbox" id="delivery_option_<?php echo $key ?>" name="delivery_options[<?php echo $key ?>]" class="checkbox delivery-option" <?php if(array_key_exists($key, $selected_options)) echo "checked='checked'" ?> /></td>
+		<td><?php echo $this->__($description) ?></td>
+	    </tr>
+	    <?php endforeach; ?>
+	</tbody>
+    </table>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+$$('input[id^=delivery_option_]').invoke('on', 'change', function() {
+    refreshQuotes();
+});
+$$('input[id^=delivery_option_]').each(function(control) {
+   control.disabled = false; 
+});
+//]]>
+</script>
+<?php endif; ?>
+<?php if($this->showInstructions()): ?>
+    <div id="customer-instructions" class="input-box customer-instructions">
+	<label for="instructions">Shipping Instructions</label>
+	<div class="input-box">
+	    <input type="text" maxlength="30" name="instructions" id="instructions" class="input-text instructions" value="<?php echo $this->getInstructions()?>" />
+	</div>
+	<span class="note">Maximum 30 characters.</span>
+    </div>
+    <?php endif; ?>
+    <?php if($this->showComment()): ?>
+    <div id="customer-comment" class="input-box customer-comment">
+	<label for="comment">Comment</label>
+	<div class="input-box">
+	    <textarea class="comment" id="comment" name="comment" class="textarea" maxlength="5000" title="Comment" value="<?php echo $this->getComment() ?>"></textarea>
+	</div>
+	<span class="note">Maximum 5000 characters.</span>
+    </div>
+<?php endif; ?>

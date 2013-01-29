@@ -1,0 +1,124 @@
+<?php 
+/* @var $this Ewave_Temando_Block_Onepage_Shipping_Method_Available_Multi */ 
+$_options = $this->getOptions();
+$_selectedMethods = $this->getSelectedShippingMethods();
+?>
+<h3>Multi Origin Shipping</h3>
+
+<?php if (!($_shippingRateGroups = $this->getShippingRates())): ?>
+    <p><?php echo $this->__('Sorry, no quotes are available for this order at this time.') ?></p>
+<?php else: ?>
+    <div class="no-display">
+	<input name="shipping_method" type="radio" value="temando_multi" id="s_method_temando_multi" checked="checked" class="radio" />
+	<input name="total_origins" type="text" value="<?php echo count($this->getOrigins())?>" />
+    </div>
+    <table class="data-table">
+	    <thead>
+		<tr>
+		    <th class="a-center">Origin Warehouse</th>
+		    <th class="a-center">Products</th>
+		    <th class="a-center">Shipping Method</th>
+		</tr>
+	    </thead>
+	    <tbody>
+		<?php foreach($this->getOrigins() as $origin_id => $products): ?>
+		    <tr>
+			<td><h5><?php echo $this->getOrigin($origin_id)->getName() ?></h5></td>
+			<td>
+			    <ul class="ul">
+			    <?php foreach($products as $product_id): ?>
+				<li class="product-<?php echo $product_id ?>"><?php echo $this->getProductHtml($product_id) ?></li>
+			    <?php endforeach; ?>
+			    </ul>
+			</td>
+			<td>
+			    <dl class="sp-methods">
+				<?php if (($_originShippingRateGroups = $this->getShippingRatesByOrigin($origin_id))): ?>
+				    <?php foreach ($_originShippingRateGroups as $code => $rates): ?>
+					<dt><?php echo $this->getCarrierName($code) ?></dt>
+					<?php foreach($rates as $rate): ?>
+					    <?php if($rate->getErrorMessage()): ?>
+						<ul class="messages"><li class="error-msg"><?php echo $rate->getErrorMessage() ?></li></ul>
+					    <?php else: ?>
+						<dd>
+						    <input name="shipping_method[<?php echo $origin_id ?>]" type="radio" value="<?php echo $rate->getCode() ?>" id="s_method_<?php echo $rate->getCode() ?>"<?php if(is_array($_selectedMethods) && $rate->getCode()===$_selectedMethods[$origin_id]) echo ' checked="checked"' ?> class="radio <?php echo $this->getClassFromRateCode($rate->getCode())?>" />
+						    <label for="s_method_<?php echo $rate->getCode() ?>"><?php echo $rate->getMethodTitle() ?>
+							<?php $_excl = $this->getShippingPrice($rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+							<?php $_incl = $this->getShippingPrice($rate->getPrice(), true); ?>
+							<?php echo $_excl; ?>
+							<?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+							    (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
+							<?php endif; ?>
+						    </label>
+						</dd>
+					    <?php endif; ?>
+					<?php endforeach; ?>
+				    <?php endforeach; ?>
+				<?php else: ?>
+				    <p><?php echo $this->__('Sorry, no quotes are available for this origin at this time.') ?></p>
+				<?php endif; ?>
+			    </dl>
+			</td>
+		    </tr>
+		<?php endforeach; ?>
+	    </tbody>	
+	</table>
+	<?php echo $this->getBlockHtml('delivery_options'); ?>
+	<div id="temando_checkboxes">
+	    <br />
+	    <table class='insurance'>
+		<tr>
+		<?php foreach($_options as $_option_id => $_option): ?>
+		    <?php /* @var $_option Ewave_Temando_Model_Option_Abstract */ ?>
+		    <?php if ($_option instanceof Ewave_Temando_Model_Option_Boolean): ?>
+			<?php if ($_option->getForcedValue() === Ewave_Temando_Model_Option_Boolean::NO): ?>
+			    <td class='c1' style="display: none;">
+			<?php else : ?>
+			    <td class='c1'>
+			<?php endif; ?>
+			    <input
+				type="checkbox"
+				<?php if ($_option->getForcedValue() !== Ewave_Temando_Model_Option_Boolean::NO): ?>
+				    checked="checked"
+				<?php endif; ?>
+				id="temando_checkbox_<?php echo $_option_id; ?>"
+				<?php if ($_option->getForcedValue() === Ewave_Temando_Model_Option_Boolean::YES): ?>
+				    disabled="disabled"
+				<?php endif; ?>
+				class="checkbox"
+			    />
+			    <label for="temando_checkbox_<?php echo $_option_id; ?>">
+				<?php echo $_option->getName(); ?>
+			    </label>
+		    <?php endif; ?>
+			</td>
+		<?php endforeach; ?>
+		    </tr>
+		    <tr>
+		<?php foreach($_options as $_option_id => $_option): ?>
+		    <?php /* @var $_option Ewave_Temando_Model_Option_Abstract */ ?>
+		    <?php if ($_option instanceof Ewave_Temando_Model_Option_Boolean): ?>
+			<?php if ($_option->getForcedValue() === Ewave_Temando_Model_Option_Boolean::NO): ?>
+			    <td class='c2' style="display: none;">
+			<?php else : ?>
+			    <td class='c2'>
+			<?php endif; ?>
+				<?php echo $_option->getDescription(); ?>
+		    <?php endif; ?>
+			</td>
+		<?php endforeach; ?>
+		</tr>
+	    </table>
+	</div>
+<?php endif; ?>
+<script type="text/javascript">
+//<![CDATA[
+    $$('#temando_checkboxes input[type=checkbox]').each(function (control) {
+	Event.observe(control, 'click', function () {
+	    option_update_multi(control);
+	})
+    });
+    // Hide Temando quotes that don't match the checked options
+    option_update_multi();
+//]]>
+</script>
